@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const ScheduleVisualization = () => {
-  // Données initiales avec 12 semaines (S1, S2, S3, S4...)
+  // Initial schedule data
   const initialSchedule = [
     { name: "Milan", weeks: ["M", "S", "A", "M", "S", "A", "RTT", "A", "M", "S", "A", "RTT"] },
     { name: "Raphael", weeks: ["M", "M", "A", "S", "M", "S", "A", "S", "A", "M", "M", "S"] },
@@ -10,10 +10,28 @@ const ScheduleVisualization = () => {
 
   const [schedule, setSchedule] = useState(initialSchedule);
 
-  // Fonction pour mettre à jour les données modifiées dans le tableau
+  // Function to calculate shift counts and score for a person
+  const calculateStats = (weeks) => {
+    const stats = { morning: 0, evening: 0, afternoon: 0, score: 0 };
+
+    weeks.forEach((shift) => {
+      if (shift === "M") stats.morning++;
+      if (shift === "S") stats.evening++;
+      if (shift === "A") stats.afternoon++;
+    });
+
+    // Calculate score (example: balanced shifts get a higher score)
+    const totalShifts = stats.morning + stats.evening + stats.afternoon;
+    const balanceFactor = Math.min(stats.morning, stats.evening, stats.afternoon);
+    stats.score = totalShifts > 0 ? Math.round((balanceFactor / totalShifts) * 10) : 0;
+
+    return stats;
+  };
+
+  // Handle input changes for shifts
   const handleInputChange = (e, rowIndex, weekIndex) => {
     const updatedSchedule = [...schedule];
-    updatedSchedule[rowIndex].weeks[weekIndex] = e.target.value;
+    updatedSchedule[rowIndex].weeks[weekIndex] = e.target.value.toUpperCase();
     setSchedule(updatedSchedule);
   };
 
@@ -36,24 +54,37 @@ const ScheduleVisualization = () => {
             <th>S10</th>
             <th>S11</th>
             <th>S12</th>
+            <th>Matin</th>
+            <th>Soir</th>
+            <th>Après midi</th>
+            <th>Score</th>
           </tr>
         </thead>
         <tbody>
-          {schedule.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              <td>{row.name}</td>
-              {row.weeks.map((shift, weekIndex) => (
-                <td key={weekIndex}>
-                  <input
-                    type="text"
-                    className="form-control form-control-sm"
-                    value={shift}
-                    onChange={(e) => handleInputChange(e, rowIndex, weekIndex)}
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
+          {schedule.map((row, rowIndex) => {
+            const stats = calculateStats(row.weeks);
+
+            return (
+              <tr key={rowIndex}>
+                <td>{row.name}</td>
+                {row.weeks.map((shift, weekIndex) => (
+                  <td key={weekIndex}>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      value={shift}
+                      onChange={(e) => handleInputChange(e, rowIndex, weekIndex)}
+                    />
+                  </td>
+                ))}
+                {/* Display calculated stats */}
+                <td>{stats.morning}</td>
+                <td>{stats.evening}</td>
+                <td>{stats.afternoon}</td>
+                <td>{stats.score}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
