@@ -43,7 +43,7 @@ const NewSchedulePage = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-primary mb-3">Création d'un Nouvel Emploi du Temps</h2>
+      {/* <h2 className="text-primary mb-3">Création d'un Nouvel Emploi du Temps</h2> */}
       <form onSubmit={handleSubmit}>
         {/* Team Size */}
         <div className="mb-3">
@@ -52,7 +52,7 @@ const NewSchedulePage = () => {
             className="form-label text-danger mb-2"
             style={{ fontSize: "1.1rem", fontWeight: "bold" }}
           >
-            Taille de l'équipe :
+            Nombre des personnes :
           </label>
           <input
             type="number"
@@ -93,7 +93,10 @@ const NewSchedulePage = () => {
               >
                 <option value="">Type de Contrat</option>
                 <option value="100%">100%</option>
-                <option value="85%">85%</option>
+                <option value="90%">90%</option>
+                <option value="80%">80%</option>
+                <option value="70%">70%</option>
+                <option value="60%">60%</option>
                 <option value="50%">50%</option>
               </select>
               <button
@@ -105,6 +108,7 @@ const NewSchedulePage = () => {
               </button>
             </div>
           ))}
+          <br />
           <button
             type="button"
             className="btn btn-primary btn-sm"

@@ -10,7 +10,6 @@ const ExistantSchedulePage = () => {
     M: "",
     S: "",
     A: "",
-    VAC: "",
   });
 
   const handleInputChange = (e) => {
@@ -22,20 +21,12 @@ const ExistantSchedulePage = () => {
   };
 
   const tagOptions = [
-    "Repos",
-    "Télétravail",
-    "RTT complet",
     "Matin",
-    "Maintenance",
-    "Meeting",
     "Soir",
-    "Support",
     "Surveillance",
     "Après-midi",
-    "Administration",
-    "Activité",
+    "Repos",
     "Vacances",
-    "Congé",
     "Absence autorisée",
   ];
 

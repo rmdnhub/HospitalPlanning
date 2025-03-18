@@ -20,7 +20,7 @@ const HomePage = () => {
         />
         <Button
           label="Non"
-          onClick={() => navigate("/new-schedule")}
+          onClick={() => navigate("/shift-creation")}
           variant="danger"
           size="lg"
         />
