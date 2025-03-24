@@ -1,25 +1,62 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const EmployeeSetupPage = ({ onNext }) => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const [newEmployee, setNewEmployee] = useState({ 
     name: "", 
     contract: "100%", 
-    preferences: [], // This will store an array of preferences (day + shift)
+    preferences: [] // Ce champ sera conservé pour l'affichage, même s'il n'est pas envoyé au backend
   });
 
-  const addEmployee = () => {
-    if (newEmployee.name && newEmployee.preferences.length > 0) {
-      setEmployees([...employees, newEmployee]);
-      setNewEmployee({ name: "", contract: "100%", preferences: [] });
+  // Récupérer tous les employés depuis le backend
+  const getAllEmployees = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/personnes");
+      setEmployees(response.data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      alert("Erreur lors du chargement des employés.");
     }
   };
 
+  useEffect(() => {
+    getAllEmployees();
+  }, []);
+
+  // Fonction pour ajouter un employé
+  const addEmployee = async () => {
+    if (newEmployee.name) {
+      const employeeData = {
+        nom: newEmployee.name,
+        prenom: "", 
+        actif: true,
+        id_contrat: 1, // Utilisation de l'ID du contrat directement
+      };
+  
+      try {
+        const response = await axios.post("http://localhost:8080/api/personnes", employeeData);
+        if (response.status === 201 || response.status === 200) {
+          getAllEmployees();
+          setNewEmployee({ name: "", contract: "100%", preferences: [] });
+        }
+      } catch (error) {
+        console.error("Error adding employee:", error);
+        alert("Erreur lors de l'ajout de l'employé. Vérifiez les relations en base.");
+      }
+    }
+  };
+  
+
+  // Fonctions pour ajouter ou supprimer une préférence (elles restent en gestion locale)
   const addPreference = (preference) => {
-    if (!newEmployee.preferences.includes(preference)) {
-      setNewEmployee({ ...newEmployee, preferences: [...newEmployee.preferences, preference] });
+    if (preference && !newEmployee.preferences.includes(preference)) {
+      setNewEmployee({ 
+        ...newEmployee, 
+        preferences: [...newEmployee.preferences, preference] 
+      });
     }
   };
 
@@ -56,7 +93,7 @@ const EmployeeSetupPage = ({ onNext }) => {
 
   return (
     <div className="container mt-4">
-      <h3 className="text-primary">Ajout des Employés</h3>
+      <h3 className="text-primary">Ajout des Personnes</h3>
       
       <div className="mb-3">
         <label>Nom :</label>
@@ -118,9 +155,9 @@ const EmployeeSetupPage = ({ onNext }) => {
       <button className="btn btn-success" onClick={() => navigate("/forbidden-shifts")}>Suivant</button>
 
       <ul className="mt-3">
-        {employees.map((emp, index) => (
-          <li key={index}>
-            {emp.name} ({emp.contract}) - Préférences: {emp.preferences.join(', ')}
+        {employees.map((emp) => (
+          <li key={emp.idPersonne}>
+            {emp.nom} ({emp.contrat ? emp.contrat.idContrat : "N/A"}) - Préférences: {emp.preferences ? emp.preferences.join(', ') : "aucune"}
           </li>
         ))}
       </ul>
