@@ -63,7 +63,7 @@ const ForbiddenShiftsPage = () => {
       alert("Erreur lors de l'enregistrement de l'interdiction.");
     }
   };
-    
+
 
   // Delete an interdiction
   const removeInterdiction = async (idShift, idShift1) => {

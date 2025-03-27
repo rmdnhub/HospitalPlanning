@@ -1,14 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const NeedsSetupPage = ({ onNext }) => {
   const navigate = useNavigate();
   const [needs, setNeeds] = useState({});
-
+  const [shiftRows, setShiftRows] = useState([]);
+  
   const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
-  const handleChange = (shift, day, value) => {
-    setNeeds({ ...needs, [`${shift}-${day}`]: value });
+  // Fetch shifts from backend (/api/shiftsPostes)
+  const fetchShifts = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/shiftsPostes");
+      setShiftRows(response.data); // Expect an array of objects, each with idShift and tag
+    } catch (error) {
+      console.error("Error fetching shifts:", error);
+      alert("Erreur lors du chargement des shifts.");
+    }
+  };
+
+  useEffect(() => {
+    fetchShifts();
+  }, []);
+
+  // Update the local 'needs' state for a specific cell
+  const handleChange = (shiftId, dayIndex, value) => {
+    setNeeds({ ...needs, [`${shiftId}-${dayIndex}`]: value });
+  };
+
+  // On submit, iterate over all cells and send a POST for each non-empty value
+  const handleSubmit = async () => {
+    const requests = [];
+
+    shiftRows.forEach((shift) => {
+      for (let i = 0; i < jours.length; i++) {
+        const key = `${shift.idShift}-${i}`;
+        const cellValue = needs[key];
+        if (cellValue && cellValue !== "") {
+          const payload = {
+            id: {
+              idShift: shift.idShift,
+              idJour: i + 1 // Assuming Lundi is 1, Mardi is 2, etc.
+            },
+            valeurSouhaitee: parseInt(cellValue, 10)
+          };
+          requests.push(axios.post("http://localhost:8080/api/besoins", payload));
+        }
+      }
+    });
+
+    if (requests.length === 0) {
+      alert("Aucun besoin n'a été saisi.");
+      return;
+    }
+
+    try {
+      await Promise.all(requests);
+      alert("Besoins sauvegardés avec succès !");
+      navigate("/schedule-visualization");
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde des besoins :", error);
+      alert("Erreur lors de la sauvegarde des besoins.");
+    }
   };
 
   return (
@@ -18,20 +72,22 @@ const NeedsSetupPage = ({ onNext }) => {
         <thead>
           <tr>
             <th>Shift</th>
-            {jours.map((jour, i) => <th key={i}>{jour}</th>)}
+            {jours.map((jour, i) => (
+              <th key={i}>{jour}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {["M", "S", "A", "RTT"].map((shift) => (
-            <tr key={shift}>
-              <td>{shift}</td>
-              {jours.map((jour, day) => (
-                <td key={day}>
+          {shiftRows.map((shift) => (
+            <tr key={shift.idShift}>
+              <td>{shift.tag}</td>
+              {jours.map((jour, i) => (
+                <td key={i}>
                   <input 
                     type="number" 
                     className="form-control" 
-                    value={needs[`${shift}-${day}`] || ""} 
-                    onChange={(e) => handleChange(shift, day, e.target.value)} 
+                    value={needs[`${shift.idShift}-${i}`] || ""} 
+                    onChange={(e) => handleChange(shift.idShift, i, e.target.value)}
                   />
                 </td>
               ))}
@@ -39,7 +95,9 @@ const NeedsSetupPage = ({ onNext }) => {
           ))}
         </tbody>
       </table>
-      <button className="btn btn-success" onClick={() => navigate("/schedule-visualization")}>Valider</button>
+      <button className="btn btn-success" onClick={handleSubmit}>
+        Valider
+      </button>
     </div>
   );
 };

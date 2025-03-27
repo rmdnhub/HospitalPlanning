@@ -35,6 +35,14 @@ public class InterdictionPrecedentController {
         return interdictionPrecedentService.createInterdiction(interdiction);
     }
 
+    // @DeleteMapping
+    // public ResponseEntity<Void> deleteInterdiction(@RequestParam("first") int
+    // idShift,
+    // @RequestParam("second") int idShift1) {
+    // interdictionPrecedentService.deleteInterdiction(idShift, idShift1);
+    // return ResponseEntity.noContent().build();
+    // }
+
     @DeleteMapping
     public ResponseEntity<Void> deleteInterdiction(@RequestParam("first") int idShift,
             @RequestParam("second") int idShift1) {
