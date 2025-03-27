@@ -41,7 +41,7 @@ const NeedsSetupPage = ({ onNext }) => {
           const payload = {
             id: {
               idShift: shift.idShift,
-              idJour: i + 1 // Assuming Lundi is 1, Mardi is 2, etc.
+              idJour: i + 1 
             },
             valeurSouhaitee: parseInt(cellValue, 10)
           };
@@ -86,7 +86,7 @@ const NeedsSetupPage = ({ onNext }) => {
                   <input 
                     type="number" 
                     className="form-control" 
-                    value={needs[`${shift.idShift}-${i}`] || ""} 
+                    value={needs[`${shift.idShift}-${i}`] || "0"} 
                     onChange={(e) => handleChange(shift.idShift, i, e.target.value)}
                   />
                 </td>
